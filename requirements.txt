@@ -1,0 +1,5 @@
+python-telegram-bot[job-queue]==21.7
+openai==1.58.1
+duckduckgo-search==7.2.1
+python-dotenv==1.0.1
+aiosqlite==0.20.0
