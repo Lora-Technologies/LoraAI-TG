@@ -103,6 +103,7 @@ python bot.py
 | `MAX_TOKENS` | `4096` | Maximum tokens per AI response |
 | `MODEL` | `gemini-2.5-pro` | AI model identifier |
 | `LOG_LEVEL` | `INFO` | Logging verbosity level |
+| `DATABASE_PATH` | `data/bot.db` | SQLite database file path |
 
 ## Documentation
 

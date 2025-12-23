@@ -27,13 +27,15 @@ class RateLimiter:
         
         self._last_cleanup = now
         
-        empty_users = [uid for uid, reqs in self._user_requests.items() if not reqs]
-        for uid in empty_users:
-            del self._user_requests[uid]
+        for uid in list(self._user_requests.keys()):
+            self._user_requests[uid] = [req for req in self._user_requests[uid] if now - req < self.window]
+            if not self._user_requests[uid]:
+                del self._user_requests[uid]
         
-        empty_groups = [cid for cid, reqs in self._group_requests.items() if not reqs]
-        for cid in empty_groups:
-            del self._group_requests[cid]
+        for cid in list(self._group_requests.keys()):
+            self._group_requests[cid] = [req for req in self._group_requests[cid] if now - req < self.window]
+            if not self._group_requests[cid]:
+                del self._group_requests[cid]
         
         expired_cooldowns = [uid for uid, exp in self._cooldowns.items() if now >= exp]
         for uid in expired_cooldowns:

@@ -28,9 +28,11 @@ class Config:
     
     DATABASE_PATH: str = os.getenv("DATABASE_PATH", "data/bot.db")
     
-    SYSTEM_PROMPT: str = """Sen yardımcı bir AI asistanısın. Kullanıcıların sorularına doğru, net ve yararlı yanıtlar veriyorsun.
+    SYSTEM_PROMPT: str = """Sen yardımcı bir AI asistanısın. Şu an 2025 yılındayız.
+Kullanıcıların sorularına doğru, net ve yararlı yanıtlar veriyorsun.
 Web arama sonuçları sağlandığında, bu bilgileri kullanarak güncel ve doğru bilgiler sunuyorsun.
-Türkçe sorulara Türkçe, İngilizce sorulara İngilizce yanıt veriyorsun."""
+Türkçe sorulara Türkçe, İngilizce sorulara İngilizce yanıt veriyorsun.
+Tarih ve zaman gerektiren sorularda güncel bilgi ver."""
 
 
 config = Config()

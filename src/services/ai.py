@@ -40,7 +40,7 @@ class AIService:
                 temperature=0.7
             )
             
-            content = response.choices[0].message.content
+            content = response.choices[0].message.content or ""
             tokens_used = response.usage.total_tokens if response.usage else 0
             
             logger.info_ctx(
@@ -111,7 +111,7 @@ class AIService:
         ]
         
         entity_patterns = [
-            r'\b\d{4}\b',
+            r'\b(19|20)\d{2}\b',
             r'\b(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık)\b',
             r'\b(january|february|march|april|may|june|july|august|september|october|november|december)\b'
         ]
@@ -147,8 +147,11 @@ class AIService:
                 temperature=0.3
             )
             
-            query = response.choices[0].message.content.strip()
-            query = query.strip('"\'')
+            content = response.choices[0].message.content
+            if not content:
+                return user_message[:100]
+            
+            query = content.strip().strip('"\'')
             
             if len(query) < 3 or len(query) > 100:
                 return user_message[:100]
