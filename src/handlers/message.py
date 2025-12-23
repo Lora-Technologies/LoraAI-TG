@@ -92,7 +92,14 @@ class MessageHandler:
         try:
             search_results = None
             if await self.ai.should_search(user_message):
-                search_results = await self.search.search_web(user_message)
+                search_query = await self.ai.extract_search_query(user_message)
+                logger.info_ctx(
+                    f"Search query extracted",
+                    user_id=user.id,
+                    action="search_query",
+                    extra_data={"original": user_message[:50], "query": search_query}
+                )
+                search_results = await self.search.search_web(search_query)
                 if search_results:
                     await self.db.update_stats(user.id, searches=1)
             

@@ -1,3 +1,4 @@
+import re
 from openai import AsyncOpenAI
 from typing import AsyncGenerator, Optional
 from src.utils import get_logger
@@ -90,12 +91,70 @@ class AIService:
             raise
     
     async def should_search(self, user_message: str) -> bool:
-        search_keywords = [
-            "güncel", "bugün", "şu an", "son dakika", "haber",
-            "ne zaman", "kaç", "nerede", "kim", "fiyat",
-            "current", "today", "latest", "news", "price",
-            "weather", "hava durumu", "dolar", "euro", "bitcoin"
+        message_lower = user_message.lower()
+        
+        time_sensitive_keywords = [
+            "güncel", "bugün", "şu an", "şimdi", "son dakika", "haber",
+            "current", "today", "now", "latest", "news", "recent"
         ]
         
-        message_lower = user_message.lower()
-        return any(keyword in message_lower for keyword in search_keywords)
+        question_keywords = [
+            "ne zaman", "kaç", "nerede", "kim", "nasıl", "hangi",
+            "when", "how much", "where", "who", "what", "which"
+        ]
+        
+        topic_keywords = [
+            "fiyat", "kur", "dolar", "euro", "bitcoin", "altın", "borsa",
+            "hava durumu", "weather", "deprem", "earthquake",
+            "maç", "skor", "lig", "match", "score",
+            "seçim", "election", "sonuç", "result"
+        ]
+        
+        entity_patterns = [
+            r'\b\d{4}\b',
+            r'\b(ocak|şubat|mart|nisan|mayıs|haziran|temmuz|ağustos|eylül|ekim|kasım|aralık)\b',
+            r'\b(january|february|march|april|may|june|july|august|september|october|november|december)\b'
+        ]
+        
+        for pattern in entity_patterns:
+            if re.search(pattern, message_lower):
+                return True
+        
+        if any(kw in message_lower for kw in time_sensitive_keywords):
+            return True
+        
+        if any(kw in message_lower for kw in topic_keywords):
+            return True
+        
+        question_marks = message_lower.count("?")
+        if question_marks > 0 and any(kw in message_lower for kw in question_keywords):
+            return True
+        
+        return False
+    
+    async def extract_search_query(self, user_message: str) -> str:
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Kullanıcının mesajından web araması için optimize edilmiş kısa bir arama sorgusu çıkar. Sadece arama sorgusunu yaz, başka bir şey yazma. Gereksiz kelimeleri çıkar, özlü tut."
+                    },
+                    {"role": "user", "content": user_message}
+                ],
+                max_tokens=50,
+                temperature=0.3
+            )
+            
+            query = response.choices[0].message.content.strip()
+            query = query.strip('"\'')
+            
+            if len(query) < 3 or len(query) > 100:
+                return user_message[:100]
+            
+            return query
+            
+        except Exception as e:
+            logger.error_ctx(f"Search query extraction error: {str(e)}", action="query_extract_error")
+            return user_message[:100]
