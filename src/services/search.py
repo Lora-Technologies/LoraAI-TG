@@ -8,13 +8,15 @@ logger = get_logger("search_service")
 
 class SearchService:
     def __init__(self):
-        self.ddgs = DDGS()
+        pass
     
     async def search_web(self, query: str, max_results: int = 5) -> list[dict]:
         try:
-            results = await asyncio.to_thread(
-                lambda: list(self.ddgs.text(query, max_results=max_results))
-            )
+            def _search():
+                with DDGS() as ddgs:
+                    return list(ddgs.text(query, max_results=max_results))
+            
+            results = await asyncio.to_thread(_search)
             
             logger.info_ctx(
                 f"Web search completed: {query}",
@@ -30,9 +32,11 @@ class SearchService:
     
     async def search_news(self, query: str, max_results: int = 5) -> list[dict]:
         try:
-            results = await asyncio.to_thread(
-                lambda: list(self.ddgs.news(query, max_results=max_results))
-            )
+            def _search_news():
+                with DDGS() as ddgs:
+                    return list(ddgs.news(query, max_results=max_results))
+            
+            results = await asyncio.to_thread(_search_news)
             
             logger.info_ctx(
                 f"News search completed: {query}",

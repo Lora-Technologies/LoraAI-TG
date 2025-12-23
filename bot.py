@@ -1,5 +1,6 @@
 import asyncio
 import signal
+import sys
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -95,15 +96,15 @@ class TelegramBot:
         
         stop_event = asyncio.Event()
         
-        def signal_handler():
+        def signal_handler(*args):
             stop_event.set()
         
-        loop = asyncio.get_event_loop()
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            try:
+        if sys.platform != "win32":
+            loop = asyncio.get_event_loop()
+            for sig in (signal.SIGINT, signal.SIGTERM):
                 loop.add_signal_handler(sig, signal_handler)
-            except NotImplementedError:
-                signal.signal(sig, lambda s, f: signal_handler())
+        else:
+            signal.signal(signal.SIGINT, signal_handler)
         
         await stop_event.wait()
         await self.stop()
