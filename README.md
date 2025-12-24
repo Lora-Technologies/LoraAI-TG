@@ -58,7 +58,7 @@ Lora Telegram Bot is a production-ready, scalable Telegram bot that leverages th
 ### Quick Start
 
 ```bash
-git clone https://github.com/your-org/lora-telegram-bot.git
+git clone https://github.com/Lora-Technologies/lora-telegram-bot.git
 cd lora-telegram-bot
 
 python -m venv venv
